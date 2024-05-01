@@ -6,11 +6,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
-import { GatewayModule } from './gateway/gateway.module';
+import { UploadFileModule } from './upload-file/upload-file.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
+import { GatewayModule } from './webSockets/gateway/gateway.module';
+import { RoomModule } from './room/room.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot( {isGlobal: true} ),
+    DevtoolsModule.register({
+      http: process.env.NODE_ENV !== 'production',
+    }),
     TypeOrmModule.forRootAsync(
       {
         imports: [ConfigModule , GatewayModule],
@@ -27,9 +34,12 @@ import { GatewayModule } from './gateway/gateway.module';
         inject: [ConfigService]
       }
     ),
+    MulterModule.register({ dest: './uploads' }),
     UserModule,
     AuthModule,
-    PostsModule
+    PostsModule,
+    RoomModule,
+    UploadFileModule
   ],
   controllers: [AppController],
   providers: [AppService],
