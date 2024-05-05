@@ -19,11 +19,5 @@ export class RoomController {
       message: 'WebSocket connection created for room ' + uniqRoomId 
     };
   }
-
-  // @Post('/:roomId/sendMessage')
-  // async sendMessageToRoom(@Param('roomId') roomId: string, @Body() data: any) {
-  //   this.webSocketService.sendMessageToRoom(roomId, 'message', data);
-  //   return { message: 'Message sent to room ' + roomId };
-  // }
   
 }

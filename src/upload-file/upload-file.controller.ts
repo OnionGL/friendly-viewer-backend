@@ -19,9 +19,7 @@ export class UploadFileController {
     storage: diskStorage({
       destination: './files',
       filename: (req , file , callback) => {
-        
         callback(null , `${file.originalname}`)
-
       }
     })
   }))
@@ -30,6 +28,13 @@ export class UploadFileController {
   @Get('/getFile')
   getFile(@Res() res: Response , @Body() file: FileParams) {
     res.sendFile(path.join(__dirname , '../../files/' + file.fileName))
+  }
+
+  @Post('/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(@UploadedFile() file) {
+    const { buffer, originalname } = file;
+    return await this.uploadFileService.saveFile(buffer, originalname);
   }
 
 

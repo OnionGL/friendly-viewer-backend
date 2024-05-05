@@ -11,7 +11,8 @@ import { JwtService } from '@nestjs/jwt';
 export class UserService {
 
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(User) 
+    private userRepository: Repository<User>,
     private jwtService: JwtService
   ){}
 
@@ -40,4 +41,13 @@ export class UserService {
       where: {email}
     });
   }
+
+  async findById(id: number) {
+    return await this.userRepository.findOneBy({ id })
+  }
+
+  async updateUser(updateUser: Partial<UpdateUserDto>) {
+    return await this.userRepository.update(updateUser.id , {...updateUser})
+  }
+
 }

@@ -1,17 +1,13 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class File {
-    @PrimaryGeneratedColumn()
-    id: number
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    fileName: string
+  @Column('bytea', { nullable: false })
+  data: Buffer;
 
-    @CreateDateColumn()
-    createdAt: Date
-    
-    @UpdateDateColumn()
-    updateAt: Date
-
+  @Column({ nullable: false })
+  filename: string;
 }
