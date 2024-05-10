@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { UploadFileService } from './upload-file.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -28,6 +28,11 @@ export class UploadFileController {
   @Get('/getFile')
   getFile(@Res() res: Response , @Body() file: FileParams) {
     res.sendFile(path.join(__dirname , '../../files/' + file.fileName))
+  }
+
+  @Get('/file/:id')
+  getFileById(@Param("id") id: number) {
+    return this.uploadFileService.getFileById(id)
   }
 
   @Post('/upload')

@@ -18,7 +18,7 @@ export class UserController {
     return this.userService.findById(id)
   }
 
-  @Patch('/update')
+  @Patch()
   patchUser(@Body() user: Partial<UpdateUserDto>) {
     return this.userService.updateUser(user)
   }

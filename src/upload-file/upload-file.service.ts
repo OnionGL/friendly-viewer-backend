@@ -18,5 +18,9 @@ export class UploadFileService {
         return await this.fileRepository.save(file);
     }
 
+    async getFileById(id: number) {
+        return await this.fileRepository.findOneBy({id})
+    }
+
 
 }

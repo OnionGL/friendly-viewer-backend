@@ -8,6 +8,8 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
     name: string
 
+    imageId: number
+
     @IsEmail()
     email: string;
 
