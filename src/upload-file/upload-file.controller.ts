@@ -30,12 +30,12 @@ export class UploadFileController {
     res.sendFile(path.join(__dirname , '../../files/' + file.fileName))
   }
 
-  @Get('/file/:id')
+  @Get('/:id')
   getFileById(@Param("id") id: number) {
     return this.uploadFileService.getFileById(id)
   }
 
-  @Post('/upload')
+  @Post()
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file) {
     const { buffer, originalname } = file;

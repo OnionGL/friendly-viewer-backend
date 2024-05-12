@@ -52,6 +52,14 @@ export class Gateway implements OnModuleInit  {
         
     }
 
+    @SubscribeMessage('addVideo')
+    addVideo(client: Socket , data: any) {
+        
+        const roomId = data.roomId
+
+        this.server.to(roomId).emit("addingVideo" , {videoId: data.videoId})
+    }
+
     @SubscribeMessage('sendMessage')
     handleMessage(client: Socket, message: any) {
         

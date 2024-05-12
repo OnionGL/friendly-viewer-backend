@@ -18,9 +18,12 @@ export class UserController {
     return this.userService.findById(id)
   }
 
-  @Patch()
-  patchUser(@Body() user: Partial<UpdateUserDto>) {
-    return this.userService.updateUser(user)
+  @Patch('/:id')
+  patchUser(@Param("id") id:number , @Body() user: Partial<UpdateUserDto>) {
+
+    const updateUser = {...user , id}
+
+    return this.userService.updateUser(updateUser)
   }
 
 }
