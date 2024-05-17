@@ -18,6 +18,14 @@ export class UserController {
     return this.userService.findById(id)
   }
 
+  @Post('/guest')
+  createGuestUser() {
+    return this.create({
+      email: `guest${Date.now()}@gmail.com`,
+      password: "121212121212121212"
+    })
+  }
+
   @Patch('/:id')
   patchUser(@Param("id") id:number , @Body() user: Partial<UpdateUserDto>) {
 

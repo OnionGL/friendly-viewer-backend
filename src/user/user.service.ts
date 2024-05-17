@@ -50,4 +50,11 @@ export class UserService {
     return await this.userRepository.update(updateUser.id , {...updateUser})
   }
 
+  async createGuestUser() {
+    return this.create({
+      email: `guest${Date.now()}@gmail.com`,
+      password: "rararawasdasd12312321"
+    })
+  }
+
 }

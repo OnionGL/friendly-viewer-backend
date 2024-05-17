@@ -49,7 +49,10 @@ export class Gateway implements OnModuleInit  {
 
     @SubscribeMessage('leaveRoom')
     leaveRoom(client: Socket , data: roomBody) {
-        
+        if(this.historyConnectedUsers[data.roomId]?.includes(data.currentUserId)) {
+            this.historyConnectedUsers[data.roomId] = this.historyConnectedUsers[data.roomId].filter(clientId => data.currentUserId !== clientId)
+        }
+        this.server.to(data.roomId).emit("joinedRoom" , this.historyConnectedUsers[data.roomId])
     }
 
     @SubscribeMessage('addVideo')
@@ -58,6 +61,16 @@ export class Gateway implements OnModuleInit  {
         const roomId = data.roomId
 
         this.server.to(roomId).emit("addingVideo" , {videoId: data.videoId})
+    }
+
+    @SubscribeMessage('playVideo')
+    playVideo(client: Socket , data: {roomId: string}) {
+        this.server.to(data.roomId).emit("allStart" , {})
+    }
+
+    @SubscribeMessage('pauseVideo')
+    pauseVideo(client: Socket , data: {roomId: string}) {
+        this.server.to(data.roomId).emit("allPause" , {})
     }
 
     @SubscribeMessage('sendMessage')
