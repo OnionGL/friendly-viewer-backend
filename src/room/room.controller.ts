@@ -30,9 +30,19 @@ export class RoomController {
      return this.roomService.addVideo(body.roomId , body.videoId)
   }
 
+  @Post('/videoUrl')
+  async addVidoeByUrl(@Body() body: {roomId: string , videoUrl: string}) {
+    return this.roomService.addVideoByUrl(body.roomId , body.videoUrl)
+  }
+
   @Get('/:roomId')
   getVideo(@Param("roomId") roomId: string) {
     return this.roomService.getVideo(roomId)
+  }
+
+  @Get('/admin/:roomId')
+  getAdminUser(@Param("roomId") roomId: string){
+    return this.roomService.getAdminUser(roomId)
   }
   
 }

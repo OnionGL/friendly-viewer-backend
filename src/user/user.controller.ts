@@ -19,8 +19,9 @@ export class UserController {
   }
 
   @Post('/guest')
+  @UsePipes(new ValidationPipe())
   createGuestUser() {
-    return this.create({
+    return this.userService.create({
       email: `guest${Date.now()}@gmail.com`,
       password: "121212121212121212"
     })
@@ -32,6 +33,11 @@ export class UserController {
     const updateUser = {...user , id}
 
     return this.userService.updateUser(updateUser)
+  }
+
+  @Post('/delete')
+  deleteUser(@Body() data: {id: number}) {
+    return this.userService.deleteUser(data.id)
   }
 
 }

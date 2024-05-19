@@ -28,10 +28,23 @@ export class RoomService {
 
     }
 
+    async addVideoByUrl(roomId: string, videoUrl: string) {
+        const room = await this.roomRepository
+                .createQueryBuilder('room')
+                .where('room.roomId = :roomId', { roomId: roomId })
+                .getOne();
+        room.videoURL = videoUrl
+        return await this.roomRepository.update(room.id , {...room})
+    }
+
+    async getAdminUser(roomId: string) {
+        const room = await this.roomRepository.findOneBy({ roomId })
+        return {adminId: room.adminId}
+    }
+
     async getVideo (roomId: string) {
 
         const room = await this.roomRepository.findOneBy({ roomId })
-
 
         return {videoId: room.videoId}
     }

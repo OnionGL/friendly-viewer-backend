@@ -45,15 +45,29 @@ export class Gateway implements OnModuleInit  {
             client.emit('history', this.historyMessages[roomId]);
         }
         
-        console.log("currentTime" , this.currentTime)
-
         this.server.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId]);
+
+        this.server.to(roomId).emit("timerUpload" , {time: this.currentTime})
 
     }
 
     @SubscribeMessage('timerUpdate')
     timeUpdate(client: Socket , data: {roomId: string , time: number}) {
         this.currentTime = data.time
+        this.server.to(data.roomId).emit("timerUpload" , {time: this.currentTime})
+    }
+
+
+    @SubscribeMessage("removeUsers")
+    removeUsers(client: Socket , data: {roomId: string , removeUserId: number}) {
+
+        const roomId = data.roomId
+
+        this.historyConnectedUsers[roomId] = this.historyConnectedUsers[roomId].filter(userId => userId !== data.removeUserId)
+
+        this.server.to(roomId).emit('removeUserId' , data.removeUserId)
+
+        this.server.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId]);
     }
 
     @SubscribeMessage('leaveRoom')

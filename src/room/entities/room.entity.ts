@@ -17,6 +17,9 @@ export class Room {
     @Column({nullable: true})
     videoId: number
 
+    @Column({nullable: true})
+    videoURL: string
+
     @CreateDateColumn()
     createdAt: Date
 
