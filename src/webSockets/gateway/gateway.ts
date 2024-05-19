@@ -15,6 +15,8 @@ export class Gateway implements OnModuleInit  {
 
     private historyConnectedUsers: { [roomId: string]: number[] } = {};
 
+    private currentTime: number = 0
+
     @WebSocketServer()
     public server: Server
 
@@ -43,8 +45,15 @@ export class Gateway implements OnModuleInit  {
             client.emit('history', this.historyMessages[roomId]);
         }
         
+        console.log("currentTime" , this.currentTime)
+
         this.server.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId]);
 
+    }
+
+    @SubscribeMessage('timerUpdate')
+    timeUpdate(client: Socket , data: {roomId: string , time: number}) {
+        this.currentTime = data.time
     }
 
     @SubscribeMessage('leaveRoom')
@@ -61,6 +70,13 @@ export class Gateway implements OnModuleInit  {
         const roomId = data.roomId
 
         this.server.to(roomId).emit("addingVideo" , {videoId: data.videoId})
+    }
+
+
+    @SubscribeMessage('changeCurrentTimeVideo')
+    changeCurrentTimeVideo(client: Socket , data: {roomId: string , currentTime: number}) {
+        this.currentTime = data.currentTime
+        this.server.to(data.roomId).emit("changesCurrentTimeVideo" , {currentTime: data.currentTime})
     }
 
     @SubscribeMessage('playVideo')

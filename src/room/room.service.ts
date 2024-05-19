@@ -32,7 +32,8 @@ export class RoomService {
 
         const room = await this.roomRepository.findOneBy({ roomId })
 
-        return room.videoId
+
+        return {videoId: room.videoId}
     }
 
 }
