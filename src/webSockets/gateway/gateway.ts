@@ -95,7 +95,7 @@ export class Gateway implements OnModuleInit  {
         }
 
         if(data?.alertMessage) {
-            this.server.to(data.roomId).emit("alertMessages" , {message: data.alertMessage , alertType: data?.alertType})
+            this.server.to(data.roomId).except(client.id).emit("alertMessages" , {message: data.alertMessage , alertType: data?.alertType})
         }
 
         this.server.to(data.roomId).emit("joinedRoom" , this.historyConnectedUsers[data.roomId])
