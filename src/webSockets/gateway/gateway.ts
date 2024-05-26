@@ -5,6 +5,14 @@ import { Server , Socket } from 'socket.io'
 interface roomBody {
     roomId: string,
     currentUserId: number,
+    alertMessage: string,
+    alertType?: AlertTypes
+}
+
+export enum AlertTypes {
+    WARNING="WARNING",
+    SUCCESS="SUCCESS",
+    ERROR="ERROR"
 }
 
 
@@ -43,6 +51,10 @@ export class Gateway implements OnModuleInit  {
 
         if (this.historyMessages[roomId]) {
             client.emit('history', this.historyMessages[roomId]);
+        }
+
+        if(data?.alertMessage) {
+            this.server.to(roomId).emit("alertMessages" , {message: data.alertMessage , alertType: data?.alertType})
         }
         
         this.server.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId]);
