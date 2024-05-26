@@ -1,6 +1,7 @@
 import { OnModuleInit } from "@nestjs/common";
 import { MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Server , Socket } from 'socket.io'
+import { UserService } from "src/user/user.service";
 
 interface roomBody {
     roomId: string,
@@ -24,6 +25,10 @@ export class Gateway implements OnModuleInit  {
     private historyConnectedUsers: { [roomId: string]: number[] } = {};
 
     private currentTime: number = 0
+
+    constructor(
+        // private userService: UserService
+    ){}
 
     @WebSocketServer()
     public server: Server
@@ -54,7 +59,7 @@ export class Gateway implements OnModuleInit  {
         }
 
         if(data?.alertMessage) {
-            this.server.to(roomId).emit("alertMessages" , {message: data.alertMessage , alertType: data?.alertType})
+            this.server.to(roomId).except(client.id).emit("alertMessages" , {message: data.alertMessage , alertType: data?.alertType})
         }
         
         this.server.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId]);
@@ -71,7 +76,7 @@ export class Gateway implements OnModuleInit  {
 
 
     @SubscribeMessage("removeUsers")
-    removeUsers(client: Socket , data: {roomId: string , removeUserId: number}) {
+    removeUsers(client: Socket , data: {alertMessage?: string, alertType?: AlertTypes, roomId: string , removeUserId: number}) {
 
         const roomId = data.roomId
 
@@ -84,9 +89,15 @@ export class Gateway implements OnModuleInit  {
 
     @SubscribeMessage('leaveRoom')
     leaveRoom(client: Socket , data: roomBody) {
+
         if(this.historyConnectedUsers[data.roomId]?.includes(data.currentUserId)) {
             this.historyConnectedUsers[data.roomId] = this.historyConnectedUsers[data.roomId].filter(clientId => data.currentUserId !== clientId)
         }
+
+        if(data?.alertMessage) {
+            this.server.to(data.roomId).emit("alertMessages" , {message: data.alertMessage , alertType: data?.alertType})
+        }
+
         this.server.to(data.roomId).emit("joinedRoom" , this.historyConnectedUsers[data.roomId])
     }
 
