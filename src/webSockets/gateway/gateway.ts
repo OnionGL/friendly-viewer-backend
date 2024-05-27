@@ -22,7 +22,7 @@ export class Gateway implements OnModuleInit  {
 
     private historyMessages: { [roomId: string]: string[] } = {};
 
-    private historyConnectedUsers: { [roomId: string]: number[] } = {};
+    private historyConnectedUsers: { [roomId: string]: {id: number , cliendData: any}[] } = {};
 
     private currentTime: number = 0
 
@@ -50,8 +50,8 @@ export class Gateway implements OnModuleInit  {
             this.historyConnectedUsers[roomId] = []
         }
 
-        if(!this.historyConnectedUsers[roomId].includes(currentUserId)) {
-            this.historyConnectedUsers[roomId].push(currentUserId)
+        if(!this.historyConnectedUsers[roomId].find(({id}) => id == currentUserId)) {
+            this.historyConnectedUsers[roomId].push({id: currentUserId , cliendData: client})
         }
 
         if (this.historyMessages[roomId]) {
@@ -62,7 +62,7 @@ export class Gateway implements OnModuleInit  {
             this.server.to(roomId).except(client.id).emit("alertMessages" , {message: data.alertMessage , alertType: data?.alertType})
         }
         
-        this.server.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId]);
+        this.server.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId]?.map(({id}) => id));
 
         this.server.to(roomId).emit("timerUpload" , {time: this.currentTime})
 
@@ -80,25 +80,45 @@ export class Gateway implements OnModuleInit  {
 
         const roomId = data.roomId
 
-        this.historyConnectedUsers[roomId] = this.historyConnectedUsers[roomId].filter(userId => userId !== data.removeUserId)
+        const cliendData = this.historyConnectedUsers[roomId].find(({id}) => id == data.removeUserId)
+
+        
+        cliendData.cliendData.to(roomId).emit('removeUserId' , data.removeUserId)
+        cliendData.cliendData.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId].filter(({id}) => id !== data.removeUserId).map(({id}) => id));
+
+        setTimeout(_ => {
+            cliendData.cliendData.disconnect()   
+        } , 2000)
+
+        this.historyConnectedUsers[roomId] = this.historyConnectedUsers[roomId].filter(({id}) => id !== data.removeUserId)
 
         this.server.to(roomId).emit('removeUserId' , data.removeUserId)
 
-        this.server.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId]);
+        this.server.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId].map(({id}) => id));
     }
 
     @SubscribeMessage('leaveRoom')
     leaveRoom(client: Socket , data: roomBody) {
 
-        if(this.historyConnectedUsers[data.roomId]?.includes(data.currentUserId)) {
-            this.historyConnectedUsers[data.roomId] = this.historyConnectedUsers[data.roomId].filter(clientId => data.currentUserId !== clientId)
+        if(this.historyConnectedUsers[data.roomId]?.find(({id}) => id == data.currentUserId)) {
+            const clientData = this.historyConnectedUsers[data.roomId].find(({id}) => id == data.currentUserId)
+
+            clientData.cliendData.to(data.roomId).emit('removeUserId' , data.currentUserId)
+            clientData.cliendData.to(data.roomId).emit('joinedRoom', this.historyConnectedUsers[data.roomId].filter(({id}) => id !== data.currentUserId).map(({id}) => id));
+
+            setTimeout(_ => {
+                clientData.cliendData.disconnect()   
+            } , 2000)
+
+
+            this.historyConnectedUsers[data.roomId] = this.historyConnectedUsers[data.roomId].filter(({id}) => data.currentUserId !== id)
         }
 
         if(data?.alertMessage) {
             this.server.to(data.roomId).except(client.id).emit("alertMessages" , {message: data.alertMessage , alertType: data?.alertType})
         }
 
-        this.server.to(data.roomId).emit("joinedRoom" , this.historyConnectedUsers[data.roomId])
+        this.server.to(data.roomId).emit("joinedRoom" , this.historyConnectedUsers[data.roomId]?.map(({id}) => id))
     }
 
     @SubscribeMessage('addVideo')

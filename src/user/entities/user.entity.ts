@@ -16,6 +16,9 @@ export class User {
     @Column()
     password: string
 
+    @Column({default: false , nullable: true})
+    isGuest: boolean
+
     @OneToMany(() => Post, (post) => post.user)
     posts: Post[]
 

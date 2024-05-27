@@ -23,7 +23,8 @@ export class UserController {
   createGuestUser() {
     return this.userService.create({
       email: `guest${Date.now()}@gmail.com`,
-      password: "121212121212121212"
+      password: "121212121212121212",
+      isGuest: true
     })
   }
 
