@@ -87,7 +87,7 @@ export class Gateway implements OnModuleInit  {
         cliendData.cliendData.to(roomId).emit('joinedRoom', this.historyConnectedUsers[roomId].filter(({id}) => id !== data.removeUserId).map(({id}) => id));
 
         setTimeout(_ => {
-            cliendData.cliendData.disconnect()   
+            cliendData.cliendData.to(data.roomId).socketsLeave()    
         } , 2000)
 
         this.historyConnectedUsers[roomId] = this.historyConnectedUsers[roomId].filter(({id}) => id !== data.removeUserId)
@@ -107,7 +107,7 @@ export class Gateway implements OnModuleInit  {
             clientData.cliendData.to(data.roomId).emit('joinedRoom', this.historyConnectedUsers[data.roomId].filter(({id}) => id !== data.currentUserId).map(({id}) => id));
 
             setTimeout(_ => {
-                clientData.cliendData.disconnect()   
+                clientData.cliendData.to(data.roomId).socketsLeave()   
             } , 2000)
 
 
