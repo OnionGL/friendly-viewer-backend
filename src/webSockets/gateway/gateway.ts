@@ -8,6 +8,7 @@ interface roomBody {
     currentUserId: number,
     alertMessage: string,
     alertType?: AlertTypes
+    adminId?: number
 }
 
 export enum AlertTypes {
@@ -100,6 +101,32 @@ export class Gateway implements OnModuleInit  {
     @SubscribeMessage('leaveRoom')
     leaveRoom(client: Socket , data: roomBody) {
 
+        if(data.adminId && data.adminId == data.currentUserId) {
+
+            this.historyConnectedUsers[data.roomId].forEach(user => {
+                if(user.id == data.adminId) {
+                    user.cliendData.to(data.roomId).socketsLeave()
+                }
+
+                if(user.id !== data.adminId) {
+                    this.server.to(data.roomId).except(client.id).emit("alertMessages" , {message: "Админ комнаты покинул ее" , alertType: AlertTypes.ERROR})
+                }
+
+                setTimeout(() => {
+                    user.cliendData.to(data.roomId).socketsLeave()
+                } , 3000)
+            })
+            
+            this.historyConnectedUsers[data.roomId].forEach(user => {
+                this.server.to(data.roomId).emit('removeUserId' , user.id)
+            })
+
+            this.historyConnectedUsers[data.roomId] = []
+
+            return
+
+        } 
+
         if(this.historyConnectedUsers[data.roomId]?.find(({id}) => id == data.currentUserId)) {
             const clientData = this.historyConnectedUsers[data.roomId].find(({id}) => id == data.currentUserId)
 
@@ -112,10 +139,6 @@ export class Gateway implements OnModuleInit  {
 
 
             this.historyConnectedUsers[data.roomId] = this.historyConnectedUsers[data.roomId].filter(({id}) => data.currentUserId !== id)
-        }
-
-        if(data?.alertMessage) {
-            this.server.to(data.roomId).except(client.id).emit("alertMessages" , {message: data.alertMessage , alertType: data?.alertType})
         }
 
         this.server.to(data.roomId).emit("joinedRoom" , this.historyConnectedUsers[data.roomId]?.map(({id}) => id))
